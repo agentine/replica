@@ -38,3 +38,33 @@ func (c *config) getCopier(t reflect.Type) (CopierFunc, bool) {
 	fn, ok := c.copiers[t]
 	return fn, ok
 }
+
+// WithShallowTypes marks the given types for shallow copy only (pointer copy,
+// no recursion into fields).
+func WithShallowTypes(types ...reflect.Type) Option {
+	return func(c *config) {
+		if c.shallowTypes == nil {
+			c.shallowTypes = make(map[reflect.Type]bool)
+		}
+		for _, t := range types {
+			c.shallowTypes[t] = true
+		}
+	}
+}
+
+// WithCopier registers a custom copy function for the given type.
+func WithCopier(t reflect.Type, fn CopierFunc) Option {
+	return func(c *config) {
+		if c.copiers == nil {
+			c.copiers = make(map[reflect.Type]CopierFunc)
+		}
+		c.copiers[t] = fn
+	}
+}
+
+// WithLocking enables locking of sync.Locker fields during copy.
+func WithLocking(lock bool) Option {
+	return func(c *config) {
+		c.locking = lock
+	}
+}
