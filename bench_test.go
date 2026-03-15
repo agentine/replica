@@ -21,7 +21,7 @@ type nestedBench struct {
 func BenchmarkCopySimpleStruct(b *testing.B) {
 	orig := simpleBench{Name: "bench", Value: 42, Flag: true}
 	b.ResetTimer()
-	for b.Loop() {
+	for range b.N {
 		_, _ = Copy(orig)
 	}
 }
@@ -35,7 +35,7 @@ func BenchmarkCopyNestedStruct(b *testing.B) {
 		Numbers: [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
 	}
 	b.ResetTimer()
-	for b.Loop() {
+	for range b.N {
 		_, _ = Copy(orig)
 	}
 }
@@ -46,7 +46,7 @@ func BenchmarkCopyLargeSlice(b *testing.B) {
 		orig[i] = i
 	}
 	b.ResetTimer()
-	for b.Loop() {
+	for range b.N {
 		_, _ = Copy(orig)
 	}
 }
@@ -57,7 +57,7 @@ func BenchmarkCopyMap(b *testing.B) {
 		orig[string(rune('A'+i%26))+string(rune('0'+i/26))] = i
 	}
 	b.ResetTimer()
-	for b.Loop() {
+	for range b.N {
 		_, _ = Copy(orig)
 	}
 }
