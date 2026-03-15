@@ -13,6 +13,8 @@ var defaultShallowTypes = map[reflect.Type]bool{
 }
 
 var syncLockerType = reflect.TypeOf((*sync.Locker)(nil)).Elem()
+var syncMutexType = reflect.TypeOf(sync.Mutex{})
+var syncRWMutexType = reflect.TypeOf(sync.RWMutex{})
 
 // deepCopy recursively copies val using cfg and vis for cycle detection.
 func deepCopy(val reflect.Value, cfg *config, vis *visited) (reflect.Value, error) {
@@ -80,7 +82,8 @@ func copyStruct(val reflect.Value, cfg *config, vis *visited) (reflect.Value, er
 	result := reflect.New(t).Elem()
 
 	// If locking is enabled and the struct implements sync.Locker, lock it.
-	if cfg.locking && val.CanAddr() && val.Addr().Type().Implements(syncLockerType) {
+	// Skip sync primitives themselves — they are the lock, not data to protect.
+	if cfg.locking && val.CanAddr() && t != syncMutexType && t != syncRWMutexType && val.Addr().Type().Implements(syncLockerType) {
 		locker := val.Addr().Interface().(sync.Locker)
 		locker.Lock()
 		defer locker.Unlock()

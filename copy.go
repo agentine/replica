@@ -31,5 +31,11 @@ func CopyWith[T any](v T, opts ...Option) (T, error) {
 		return zero, err
 	}
 
-	return copied.Interface().(T), nil
+	// Use reflect.Set to handle nil interfaces safely (type assertion on nil panics).
+	var result T
+	resultVal := reflect.ValueOf(&result).Elem()
+	if copied.IsValid() {
+		resultVal.Set(copied)
+	}
+	return result, nil
 }
